@@ -1,0 +1,19 @@
+server-mode='standalone'
+backends='graphite'
+flush-interval='10s'
+ignore-host=true
+percent-threshold='95 99'
+
+[graphite]
+address='carbon:2003'
+mode='basic'
+
+[disabled-sub-metrics]
+# Percentile metrics
+count-pct=true
+mean-pct=true
+sum-pct=true
+sum-squares-pct=true
+lower-pct=true
+upper-pct=false
+

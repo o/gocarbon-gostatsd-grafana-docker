@@ -1,0 +1,88 @@
+# If you are using plain go-carbon or graphite-clickhouse
+# you should set it to URL of go-carbon's carbonserver module
+# or graphite-clickhouse's http url.
+# Listen address, should always include hostname or ip address and a port.
+listen: ":8081"
+# Max concurrent requests to CarbonZipper
+concurency: 20
+cache:
+   # Type of caching. Valid: "mem", "memcache", "null"
+   type: "mem"
+   # Cache limit in megabytes
+   size_mb: 0
+   # Default cache timeout value. Identical to DEFAULT_CACHE_DURATION in graphite-web.
+   defaultTimeoutSec: 10
+   # Only used by memcache type of cache. List of memcache servers.
+# Amount of CPUs to use. 0 - unlimited
+cpus: 0
+# Timezone, default - local
+tz: "Europe/Amsterdam,7200"
+
+maxBatchSize: 100
+graphite:
+    # Host:port where to send internal metrics
+    # Empty = disabled
+    host: "carbon:2003"
+    interval: "60s"
+    prefix: "carbon.api"
+    # rules on how to construct metric name. For now only {prefix} and {fqdn} is supported.
+    # {prefix} will be replaced with the content of {prefix}
+    # {fqdn} will be repalced with fqdn
+    pattern: "{prefix}.{fqdn}"
+# Maximium idle connections to carbonzipper
+idleConnections: 10
+pidFile: ""
+# See https://github.com/go-graphite/carbonzipper/blob/master/example.conf#L70-L108 for format explanation
+upstreams:
+    # Number of 100ms buckets to track request distribution in. Used to build
+    # 'carbon.zipper.hostname.requests_in_0ms_to_100ms' metric and friends.
+    # Requests beyond the last bucket are logged as slow (default of 10 implies
+    # "slow" is >1 second).
+    # The last bucket is _not_ called 'requests_in_Xms_to_inf' on purpose, so
+    # we can change our minds about how many buckets we want to have and have
+    # their names remain consistent.
+    buckets: 10
+
+    timeouts:
+        # Maximum backend request time for find requests.
+        find: "2s"
+        # Maximum backend request time for render requests. This is total one and doesn't take into account in-flight requests
+        render: "10s"
+        # Timeout to connect to the server
+        connect: "200ms"
+
+    # Number of concurrent requests to any given backend - default is no limit.
+    # If set, you likely want >= MaxIdleConnsPerHost
+    concurrencyLimitPerServer: 0
+
+    # Configures how often keep alive packets will be sent out
+    keepAliveInterval: "30s"
+
+    # Control http.MaxIdleConnsPerHost. Large values can lead to more idle
+    # connections on the backend servers which may bump into limits; tune with care.
+    maxIdleConnsPerHost: 100
+
+    # "http://host:port" array of instances of carbonserver stores
+    # It MUST be specified.
+    backends:
+        - "http://carbon:8080"
+# If not zero, enabled cache for find requests
+# This parameter controls when it will expire (in seconds)
+# Default: 600 (10 minutes)
+expireDelaySec: 10
+# Uncomment this to get the behavior of graphite-web as proposed in https://github.com/graphite-project/graphite-web/pull/2239
+# Beware this will make darkbackground graphs less readable
+#defaultColors:
+#      "red": "ff0000"
+#      "green": "00ff00"
+#      "blue": "#0000ff"
+#      "darkred": "#c80032"
+#      "darkgreen": "00c800"
+#      "darkblue": "002173"
+logger:
+    - logger: ""
+      file: "stderr"
+      level: "warn"
+      encoding: "console"
+      encodingTime: "iso8601"
+      encodingDuration: "seconds"

@@ -1,0 +1,1 @@
+Folder for storing carbon whisper files.

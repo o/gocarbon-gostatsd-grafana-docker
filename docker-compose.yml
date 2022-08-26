@@ -1,0 +1,45 @@
+version: "3"
+
+services:
+  carbon:
+    build: https://github.com/go-graphite/go-carbon.git#v0.16.2
+    ports:
+      - "2003:2003"
+      - "2003:2003/udp"
+    volumes:
+      - ./config/carbon/go-carbon.conf:/etc/go-carbon/go-carbon.conf
+      - ./config/carbon/storage-aggregation.conf:/etc/go-carbon/storage-aggregation.conf
+      - ./config/carbon/storage-schemas.conf:/etc/go-carbon/storage-schemas.conf
+      - ./storage/whisper:/var/lib/graphite/whisper
+    hostname: carbon
+
+  carbonapi:
+    build: https://github.com/go-graphite/carbonapi.git#v0.15.6
+    expose:
+      - 8081
+    volumes:
+      - ./config/carbonapi/carbonapi.yaml:/etc/carbonapi.yml
+    depends_on:
+      - carbon
+    hostname: carbonapi
+
+  gostatsd:
+    image: atlassianlabs/gostatsd:35.1.0
+    command: gostatsd --backends=graphite --config-path=/etc/gostatsd/gostatsd.toml
+    volumes:
+      - ./config/gostatsd/gostatsd.toml:/etc/gostatsd/gostatsd.toml
+    ports:
+      - "8125:8125"
+      - "8125:8125/udp"
+    depends_on:
+      - carbon
+
+  grafana:
+    image: grafana/grafana-oss:latest-ubuntu
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./storage/grafana:/var/lib/grafana
+    depends_on:
+      - carbonapi
+
