@@ -14,13 +14,13 @@ This repository provides a Docker Compose file for collection and a combination 
 
 ### Components
 
-| component     | link                                      | version   | license               |
-|---------------|-------------------------------------------|-----------|-----------------------|
-| gocarbon      | https://github.com/go-graphite/go-carbon  | 0.17.0    | MIT                   |
-| carbonapi     | https://github.com/go-graphite/carbonapi  | 0.16.0    | MIT                   |
-| gostatsd      | https://github.com/atlassian/gostatsd     | 35.2.1    | MIT                   |
-| grafana       | https://github.com/grafana/grafana        | latest    | GNU Affero GPL v3.0   |
-| telegraf      | https://github.com/influxdata/telegraf    | latest    | MIT                   |
+| component     | link                                      | license               |
+|---------------|-------------------------------------------|-----------------------|
+| gocarbon      | https://github.com/go-graphite/go-carbon  | MIT                   |
+| carbonapi     | https://github.com/go-graphite/carbonapi  | MIT                   |
+| gostatsd      | https://github.com/atlassian/gostatsd     | MIT                   |
+| grafana       | https://github.com/grafana/grafana        | GNU Affero GPL v3.0   |
+| telegraf      | https://github.com/influxdata/telegraf    | MIT                   |
 
 
 ### Architecture
