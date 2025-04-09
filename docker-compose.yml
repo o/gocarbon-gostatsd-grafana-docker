@@ -1,8 +1,10 @@
-version: "3"
+# Give necessary permissions before running docker compose
+# chmod -R a+rw storage/
 
 services:
   carbon:
-    build: https://github.com/go-graphite/go-carbon.git#v0.16.2
+    build: https://github.com/go-graphite/go-carbon.git#v0.17.1
+    restart: unless-stopped
     ports:
       - "2003:2003"
       - "2003:2003/udp"
@@ -11,20 +13,24 @@ services:
       - ./config/carbon/storage-aggregation.conf:/etc/go-carbon/storage-aggregation.conf
       - ./config/carbon/storage-schemas.conf:/etc/go-carbon/storage-schemas.conf
       - ./storage/whisper:/var/lib/graphite/whisper
-    hostname: carbon
+    networks:
+      - monitoring
 
   carbonapi:
-    build: https://github.com/go-graphite/carbonapi.git#v0.15.6
+    build: https://github.com/go-graphite/carbonapi.git#v0.16.0
+    restart: unless-stopped
     expose:
       - 8081
     volumes:
       - ./config/carbonapi/carbonapi.yaml:/etc/carbonapi.yml
     depends_on:
       - carbon
-    hostname: carbonapi
+    networks:
+      - monitoring
 
   gostatsd:
-    image: atlassianlabs/gostatsd:35.1.0
+    image: atlassianlabs/gostatsd:35.2.1
+    restart: unless-stopped
     command: gostatsd --backends=graphite --config-path=/etc/gostatsd/gostatsd.toml
     volumes:
       - ./config/gostatsd/gostatsd.toml:/etc/gostatsd/gostatsd.toml
@@ -33,13 +39,46 @@ services:
       - "8125:8125/udp"
     depends_on:
       - carbon
+    networks:
+      - monitoring
 
   grafana:
     image: grafana/grafana-oss:latest-ubuntu
+    restart: unless-stopped
     ports:
       - "3000:3000"
     volumes:
       - ./storage/grafana:/var/lib/grafana
+      - ./config/grafana/datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
     depends_on:
       - carbonapi
+    environment:
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+    networks:
+      - monitoring
+      - grafana-frontend
+
+  telegraf:
+    container_name: telegraf
+    image: telegraf
+    hostname: "luminary" # Don't forget to customize this one.
+    environment:
+      - HOST_ETC=/hostfs/etc
+      - HOST_PROC=/hostfs/proc
+      - HOST_SYS=/hostfs/sys
+      - HOST_VAR=/hostfs/var
+      - HOST_RUN=/hostfs/run
+      - HOST_MOUNT_PREFIX=/hostfs
+      - GRAPHITE_URL=127.0.0.1:2003 # If you’re running separately, use the correct hostname or IP address.
+    volumes:
+      - './config/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro'
+      - '/:/hostfs:ro'
+    restart: unless-stopped
+    network_mode: host
+
+networks:
+  grafana-frontend:
+    name: grafana-frontend
+  monitoring:
+    name: monitoring
 
