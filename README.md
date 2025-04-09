@@ -2,7 +2,15 @@
 
 ### What is this about?
 
-This repository provides a Docker Compose file for collection and a combination of metric tools including Grafana, go-carbon, carbonapi, and gostatsd (Go version of Graphite and Statsd). Contributions are very welcome! Feel free to create a pull request or issue about how to improve it.
+This repository provides a Docker Compose file for collection and a combination of metric tools including Grafana, telegraf, go-carbon, carbonapi, and gostatsd (Go version of Graphite and Statsd). Contributions are very welcome! Feel free to create a pull request or issue about how to improve it.
+
+### Why go-graphite?
+
+* Minimal configuration required
+* Consistent and predictable disk consumption
+* Efficient in terms of CPU and memory usage
+* Well-supported by Grafana
+* Integrates smoothly with existing tools
 
 ### Components
 
@@ -12,7 +20,7 @@ This repository provides a Docker Compose file for collection and a combination 
 | carbonapi     | https://github.com/go-graphite/carbonapi  | 0.16.0    | MIT                   |
 | gostatsd      | https://github.com/atlassian/gostatsd     | 35.2.1    | MIT                   |
 | grafana       | https://github.com/grafana/grafana        | latest    | GNU Affero GPL v3.0   |
-| grafana       | https://github.com/influxdata/telegraf    | latest    | MIT                   |
+| telegraf      | https://github.com/influxdata/telegraf    | latest    | MIT                   |
 
 
 ### Architecture
@@ -85,11 +93,24 @@ If you're planning to use a different precision rather than 10 seconds, you also
 
 ### Running
 
+Don't forget to change the hostname of Telegraf containers, and the Graphite hostname if you're running on a different host. 
+
+    telegraf:
+      hostname: "luminary" # Don't forget to customize this one.
+      environment:
+        - GRAPHITE_URL=127.0.0.1:2003 # If you’re running separately, use the correct hostname or IP address.
+
 Run the following command to kick the containers
 
     # Give necessary permissions before running docker compose
     chmod -R a+rw storage/
     docker compose up -d
+
+### Running Telegraf separately in the different hosts
+
+There is a separate `docker-compose-telegraf.yml` file for running Telegraf in the different hosts. You should customize the hostname and Graphite URL in the environment variables. You also need to copy the `config/telegraf/telegraf.conf` file. You can run with the following: 
+
+    docker compose -f docker-compose-telegraf.yml up -d
 
 ### Future ideas
 
