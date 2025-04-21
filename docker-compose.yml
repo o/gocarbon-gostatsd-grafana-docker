@@ -29,7 +29,7 @@ services:
       - monitoring
 
   gostatsd:
-    image: atlassianlabs/gostatsd:40.0.3
+    image: atlassianlabs/gostatsd:40.0.4
     restart: unless-stopped
     command: gostatsd --backends=graphite --config-path=/etc/gostatsd/gostatsd.toml
     volumes:
