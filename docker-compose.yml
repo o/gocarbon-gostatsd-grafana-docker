@@ -17,7 +17,7 @@ services:
       - monitoring
 
   carbonapi:
-    image: ghcr.io/go-graphite/carbonapi:0.17
+    image: ghcr.io/go-graphite/carbonapi:0.18
     restart: unless-stopped
     expose:
       - 8081
